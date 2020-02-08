@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:converters="clr-namespace:YTDownloaderApp.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
     xmlns:local="clr-namespace:YTDownloaderApp"
@@ -14,6 +15,7 @@
     mc:Ignorable="d">
     <Window.Resources>
         <FontFamily x:Key="UWPGlyphs">Segoe MDL2 Assets</FontFamily>
+        <converters:SecondsToTimeConverter x:Key="SecondsToTimeConvereter" />
     </Window.Resources>
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
@@ -57,6 +59,7 @@
             HorizontalAlignment="Center"
             Background="#00000000"
             BorderThickness="0"
+            ItemsSource="{Binding Models}"
             ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -67,7 +70,7 @@
                         </Grid.ColumnDefinitions>
                         <Image
                             MaxHeight="100"
-                            Source="{Binding ThumbnailURL}"
+                            Source="{Binding ThumbnailUrl}"
                             Stretch="Fill" />
 
                         <StackPanel Grid.Column="1" Margin="12,0,0,0">
@@ -80,7 +83,7 @@
                                 FontWeight="SemiBold"
                                 Foreground="White"
                                 LineHeight="20"
-                                Text="Jakiś tytuł Randomowy - adjsasdjsjdfosijdfoidsjfodsjojfsdjodfjsijoioi"
+                                Text="{Binding Title}"
                                 TextTrimming="CharacterEllipsis" />
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock
@@ -89,7 +92,7 @@
                                     FontWeight="Normal"
                                     Foreground="White"
                                     LineHeight="20"
-                                    Text="22:33:44" />
+                                    Text="{Binding LengthSeconds, Converter={StaticResource SecondsToTimeConvereter}}" />
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock

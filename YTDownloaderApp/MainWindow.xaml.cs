@@ -15,6 +15,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using YTDownloaderApp.Controls;
 using YTDownloaderCore.Regexes;
+using YTDownloaderCore.Downloader;
+using YTDownloaderCore.Models;
+using System.Collections.ObjectModel;
 
 namespace YTDownloaderApp
 {
@@ -23,14 +26,23 @@ namespace YTDownloaderApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        public ObservableCollection<VideoModel> Models { get; set; }
         public ICommand WindowMouseMove { get; set; }
         public ICommand ListViewDoubleClick { get; set; }
         public ICommand ListViewSelectionChanged { get; set; }
+        private Downloader Downloader;
 
         private string PreviousValidUrl;
         public MainWindow()
         {
             InitializeComponent();
+            Models = new ObservableCollection<VideoModel>();
+            DataContext = this;
+            // WebClient first download is slow, so download small site to improve speed of download next things
+            // It is async to not block window creation
+            Downloader = new Downloader();
+            Downloader.DownloadStringTaskAsync("http://www.nbp.pl/kursy/xml/");
+
             WindowMouseMove = new RelayCommand(o =>
             {
                 if(Clipboard.ContainsText())
@@ -41,7 +53,9 @@ namespace YTDownloaderApp
                         if (string.Compare(PreviousValidUrl, clipboardContent) != 0)
                         {
                             PreviousValidUrl = clipboardContent;
-
+                            var pruba = new VideoModel(RegexLibrary.YoutubeUrl.Match(clipboardContent).Groups["VideoId"].ToString());
+                            pruba.ParseEnd += VideoIsReady;
+                            pruba.ParseVideoInformationAsync();
                             // TODO: We need to create object here representing item on LV
                         }
                     }
@@ -57,8 +71,12 @@ namespace YTDownloaderApp
                 Debug.WriteLine(o);
                 Debug.WriteLine("Command SelectionChanged");
             });
-            DataContext = this;
-            lv.ItemsSource = new List<string> { "dupa", "sraka", "3", "4", "5", "6", "7" };
+            
+            //lv.ItemsSource = new List<string> { "dupa", "sraka", "3", "4", "5", "6", "7" };
+        }
+        private void VideoIsReady(object sender, EventArgs e)
+        {
+            Models.Add((VideoModel)sender);
         }
     }
 }
